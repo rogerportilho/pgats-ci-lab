@@ -59,12 +59,3 @@ jobs:
         with:
           name: relatorio
           path: ./playwright-report
-
-      # Gera o relatório após os testes
-      - name: Publicar resultado no PR
-        uses: dorny/test-reporter@v1
-        if: ${{ !cancelled() }}
-        with:
-          name: Test Report
-          path: ./test-results/results.xml
-          reporter: java-junit
