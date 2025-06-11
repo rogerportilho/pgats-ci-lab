@@ -1,7 +1,7 @@
 # CI de Nivel 02 - Disparo agendado
 
 # Nome do nosso pipiline
-name: 'Execucao Agendada'
+name: 'Execução Agendada'
 
 # regras de disparo (gatilhos/triggers)
 # gatilho de exec manual = schedule
