@@ -10,7 +10,7 @@ on:
   workflow_dispatch:
 
 # trabalhos/tarefas dentro do pipeline = jobs
-Jobs:   
+jobs:   
   e2e-tests:
 
     #maquina que o job vai executar
@@ -39,6 +39,6 @@ steps:
     run: yarn playwright install
 
       #executar os testes e2e
-  - name: Executrando testes e2e
+  - name: Executando testes e2e
     run: yarn run e2e
     
