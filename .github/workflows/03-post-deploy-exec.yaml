@@ -46,3 +46,4 @@ jobs:
       # Executa os testes
       - name: Executa os testes E2E
         run: yarn run e2e
+        
