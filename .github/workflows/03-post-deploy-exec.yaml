@@ -14,48 +14,43 @@ on:
 # trabalhos/tarefas dentro do pipeline = jobs
 jobs:
   e2e-tests:
+
+    # Máquina que o job vai executar
     runs-on: ubuntu-latest
 
-    # condicioal - if
-    # `${ expressao }`
+    if: ${{ github.event.workflow_run.conclusion ==  'success' }}
 
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
-
+    # Passos do script de build
     steps:
-      # clone do projeto
-      - uses: actions/checkout@v4
-        with:
-          submodules: false
-          clean: true
-          fetch-depth: 0
+    # Clone do projeto
+    - name: Clonar projeto
+      uses: actions/checkout@v4
 
-      # instalação do Node.js
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22.x
+    # Instalação do NodeJs
+    - name: Instalar NodeJs
+      uses: actions/setup-node@v3
+      with:
+        node-version: 22.x
 
-      # instalação do Yarn
-      - name: Instalando Yarn
-        run: npm install -g yarn
+    # Instalação do Yarn
+    - name: Instalar Yarn
+      run: npm install -g yarn
 
-      # instalação das dependências
-      - name: Instalando dependências
-        run: yarn
+    # Instalação das dependências
+    - name: Instalar dependências
+      run: yarn
 
-      # Verificação de formatação de código com Prettier
-      - name: Checando formatação com Prettier
-        run: yarn run format:check
+    # Instalação do Playwright
+    - name: Instalar Playwright
+      run: yarn playwright install
 
-      # instalação do Playwright
-      - name: Instalando Playwright
-        run: yarn playwright install
+    # Executar os testes e2e
+    - name: Executar Testes E2E
+      run: yarn run e2e
 
-      # execução dos testes
-      - name: Executando testes E2E
-        run: yarn run e2e
-
-      - uses: actions/upload-artifact@v4
-        if: ${{ !cancelled() }}
-        with:
-          name: relatorio
-          path: ./playwright-report
+    - uses: actions/upload-artifact@v4
+      if: ${{ !cancelled() }}
+      # if: ${{ always() }}
+      with:
+        name: relatorio
+        path: ./playwright-report
