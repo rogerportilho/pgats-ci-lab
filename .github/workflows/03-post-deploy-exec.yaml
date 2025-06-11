@@ -1,49 +1,70 @@
-# CI de Nivel 03 - Disparo após a conclusão de um pipeline
+# CI de Nível 03 - Disparo após a conclusão de um pipeline
 
-# Nome do nosso pipiline
+# nome do nosso 'pipeline'
 name: 'Execução por Deploy'
 
 # regras de disparo (gatilhos/triggers)
-# gatilho de exec manual = workflow_dispatch
-# gatilho de exec agendada = schedule
-# gatilho de exec a partir de outro pipe = workflow_run
-
+# gatilho de exec a partir de outro pipeline = workflow_run
 on:
   workflow_run:
-    workflow: ['Execução Manual']
-    types: 
+    workflows: ['Execução Manual']
+    types:
       - completed
 
 # trabalhos/tarefas dentro do pipeline = jobs
 jobs:
   e2e-tests:
-
-    #máquina onde o job vai rodar
     runs-on: ubuntu-latest
 
-    # passos do script de build
+    # condicioal - if
+    # `${ expressao }`
+
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+
     steps:
       # clone do projeto
       - uses: actions/checkout@v4
-
-      # instala o node
-      - uses: actions/setup-node@v4 
         with:
-          node-version: 22.x 
+          submodules: false
+          clean: true
+          fetch-depth: 0
 
-      # instala o yarn
-      - name: Instalando o Yarn
+      # instalação do Node.js
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.x
+
+      # instalação do Yarn
+      - name: Instalando Yarn
         run: npm install -g yarn
 
-      # instala as dependências do projeto
-      - name: Instala as dependências do projeto
-        run: yarn 
+      # instalação das dependências
+      - name: Instalando dependências
+        run: yarn
 
-      # Instalando Playwright
+      # Verificação de formatação de código com Prettier
+      - name: Checando formatação com Prettier
+        run: yarn run format:check
+
+      # instalação do Playwright
       - name: Instalando Playwright
         run: yarn playwright install
 
-      # Executa os testes
-      - name: Executa os testes E2E
+      # execução dos testes
+      - name: Executando testes E2E
         run: yarn run e2e
-        
+
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: relatorio
+          path: ./playwright-report
+
+      # Gera o relatório após os testes
+      - name: Publicar resultado no PR
+        uses: dorny/test-reporter@v1
+        if: ${{ !cancelled() }}
+        with:
+          name: Test Report
+          path: ./test-results/results.xml
+          reporter: java-junit
